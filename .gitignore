@@ -1,0 +1,24 @@
+# 系統檔
+.DS_Store
+Thumbs.db
+
+# Python
+venv/
+__pycache__/
+*.py[cod]
+*.pyo
+*.egg-info/
+dist/
+build/
+.env
+
+# Jupyter
+.ipynb_checkpoints/
+
+# 原始資料（醫療資料，不進版控）
+data/raw/
+oral0507-v1.csv
+
+# 模型檔（體積過大）
+data/processed/model_bundle.pkl
+
