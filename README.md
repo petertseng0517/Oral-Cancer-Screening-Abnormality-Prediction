@@ -14,7 +14,18 @@
 
 ---
 
-## 環境建置
+## 在 Google Colab 執行
+
+[![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/petertseng0517/Oral-Cancer-Screening-Abnormality-Prediction/blob/main/colab_runner.ipynb)
+
+1. 將 `oral0507-v1.csv` 上傳至 Google Drive，路徑：`我的雲端硬碟/oral-cancer/oral0507-v1.csv`
+2. 點擊上方 badge 在 Colab 開啟 notebook
+3. 若 Drive 路徑不同，修改 Cell 5 的 `DRIVE_CSV_PATH`
+4. 執行 **Runtime → Run all**
+
+---
+
+## 本機環境建置
 
 ```bash
 python -m venv venv
@@ -105,16 +116,17 @@ DT_PARAMS  = {"max_depth": 8, ...}
 
 ```
 final-project/
-├── main.py              # 主程式（訓練 + 評估）
-├── predict.py           # 推論（單筆預測）
-├── config.py            # 路徑、欄位、模型超參數設定
+├── main.py                 # 主程式（訓練 + 評估）
+├── predict.py              # 推論（單筆預測）
+├── config.py               # 路徑、欄位、模型超參數設定
+├── colab_runner.ipynb      # Google Colab 執行 notebook
 ├── requirements.txt
 ├── data/
-│   └── processed/       # 輸出圖表、CSV、model_bundle.pkl
+│   └── processed/          # 輸出圖表、CSV、model_bundle.pkl
 └── src/
-    ├── preprocess.py    # 前處理 pipeline
-    ├── models.py        # 模型建立與訓練
-    └── evaluate.py      # 評估與視覺化
+    ├── preprocess.py       # 前處理 pipeline
+    ├── models.py           # 模型建立與訓練
+    └── evaluate.py         # 評估與視覺化
 ```
 
 ---
@@ -134,4 +146,3 @@ final-project/
 | prev_result | 上次篩檢結果（衍生，-1=無紀錄） | 二元 |
 | years_since_last | 距上次篩檢年數（衍生） | 數值 |
 | **result** | **Label（1=異常, 0=正常）** | 二元 |
-# Oral-Cancer-Screening-Abnormality-Prediction
