@@ -58,10 +58,16 @@ python main.py
 
 需先執行過 `main.py` 產生 `model_bundle.pkl`。
 
-**互動式輸入：**
+**互動式輸入（依序輸入 9 項特徵）：**
 
 ```bash
 python predict.py
+```
+
+**雙案例對照 Demo（簡報 / 錄影展示用，內含一組驗證過的「正常」與「異常」案例）：**
+
+```bash
+python demo_predict.py
 ```
 
 **程式呼叫：**
@@ -72,17 +78,17 @@ from predict import predict_patient
 result = predict_patient(
     age=45,
     gender=1,           # 1=男, 0=女
-    screening_year=2024,
-    smoking=3,          # 0=無, 1=已戒, 2–5=現在吸（依強度）
-    betel_nut=4,        # 0=無, 1=已戒, 2–5=現在嚼（依強度）
+    smoking=4,          # 0=無, 1=已戒, 2–5=現在吸（依強度）
+    betel_nut=5,        # 0=無, 1=已戒, 2–5=現在嚼（依強度）
     indigenous=0,       # 1=是, 0=否
     oral_discomfort=1,  # 1=有, 0=無
-    screening_count=2,
-    prev_result=0,      # 第一次填 -1
-    years_since_last=2.0,
+    screening_count=0,
+    prev_result=1,      # 第一次篩檢填 -1
+    years_since_last=0.0,
 )
 print(result)
-# {'prediction': 1, 'result_label': '異常（建議轉介）', 'abnormal_probability': 0.72, ...}
+# {'prediction': 1, 'result_label': '異常（建議轉介）',
+#  'abnormal_probability': 0.7222, 'threshold': 0.35, 'model_used': 'Random Forest'}
 ```
 
 ---
@@ -117,10 +123,12 @@ DT_PARAMS  = {"max_depth": 8, ...}
 ```
 final-project/
 ├── main.py                 # 主程式（訓練 + 評估）
-├── predict.py              # 推論（單筆預測）
+├── predict.py              # 推論（單筆預測 / 互動式 CLI）
+├── demo_predict.py         # 雙案例對照 Demo（簡報 / 錄影展示用）
 ├── config.py               # 路徑、欄位、模型超參數設定
 ├── colab_runner.ipynb      # Google Colab 執行 notebook
 ├── requirements.txt
+├── hw/                     # 課程作業文件（提案、書面報告、簡報大綱）
 ├── data/
 │   └── processed/          # 輸出圖表、CSV、model_bundle.pkl
 └── src/
@@ -146,3 +154,5 @@ final-project/
 | prev_result | 上次篩檢結果（衍生，-1=無紀錄） | 二元 |
 | years_since_last | 距上次篩檢年數（衍生） | 數值 |
 | **result** | **Label（1=異常, 0=正常）** | 二元 |
+
+> 註：`screening_year` 為計算過程中的中介欄位，**未納入最終模型特徵集**（最終特徵集為 `config.py` 中的 `BASE_FEATURE_COLS + DERIVED_FEATURE_COLS`，共 9 個，即 `predict_patient()` 接受的 9 項輸入參數）。
