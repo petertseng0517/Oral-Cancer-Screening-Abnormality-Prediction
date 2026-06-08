@@ -21,10 +21,16 @@ import matplotlib.font_manager as fm
 
 def _find_chinese_font() -> str:
     candidates = ["Heiti TC", "PingFang HK", "STHeiti", "Songti SC", "Apple LiGothic",
-                  "Noto Sans CJK TC", "Noto Sans TC"]
+                  "Noto Sans CJK JP", "Noto Sans CJK TC", "Noto Sans TC"]
     available = {f.name for f in fm.fontManager.ttflist}
     for name in candidates:
         if name in available:
+            return name
+    # Linux/Colab 上 apt 安裝的 Noto CJK 字型包是多語言合集（.ttc），
+    # matplotlib 偵測到的家族名稱可能是 JP/SC/KR 等任一變體（皆涵蓋繁體中文字符集，
+    # 字尾僅影響少數異體字的預設字形偏好，不影響中文顯示），故以子字串寬鬆比對保底
+    for name in sorted(available):
+        if "Noto Sans CJK" in name:
             return name
     return "DejaVu Sans"
 
