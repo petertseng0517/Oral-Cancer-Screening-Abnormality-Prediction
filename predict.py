@@ -56,11 +56,14 @@ def predict_patient(
     回傳：
         dict，包含 prediction（0=正常, 1=異常）與 probability（異常機率）
     """
+    # model_bundle.pkl 是 main.py 訓練完成後打包的成果：
+    #   四個訓練好的模型、StandardScaler、特徵欄位順序，三者必須配套使用
     bundle = load_bundle()
     model = bundle["models"][model_name]
     scaler = bundle["scaler"]
     feature_cols = bundle["feature_cols"]
 
+    # 將輸入的 9 個特徵組成單筆資料（順序須與訓練時的 feature_cols 一致）
     data = {
         "age": age,
         "gender": gender,
@@ -73,10 +76,16 @@ def predict_patient(
         "years_since_last": years_since_last,
     }
 
+    # 依 feature_cols 重新排序欄位，再套用「訓練時 fit 好的同一個」scaler 做標準化
+    # 必須沿用同一個 scaler，否則新資料的數值尺度會跟模型訓練時不一致，預測就會失準
     X = pd.DataFrame([data])[feature_cols].astype(float)
     X_scaled = pd.DataFrame(scaler.transform(X), columns=feature_cols)
 
+    # predict_proba 回傳 [P(正常), P(異常)]，取 index=1 即為「異常機率」
     prob = model.predict_proba(X_scaled)[0][1]
+    # 與門檻比較決定最終分類：機率 >= threshold 才判定為異常
+    # 門檻採 0.35（低於模型預設的 0.5），刻意調降以提高 Recall
+    #   → 醫療情境下「寧可多通知、不要漏掉」的權衡設計
     pred = 1 if prob >= threshold else 0
 
     return {

@@ -256,21 +256,29 @@
 
 - 訓練完成後會產出 `model_bundle.pkl`（封裝四個訓練好的模型、`StandardScaler`、特徵欄位順序）
 - 提供互動式 CLI（`python predict.py`）與函式呼叫（`predict_patient()`）兩種使用方式，預設採用 **Random Forest** 模型、決策門檻 `threshold=0.35`（低於模型預設的 0.5，刻意調降以提高 Recall——在醫療情境下「寧可多通知、不要漏掉」的權衡設計）
-- 範例輸出：
+- 範例輸出（簡報 Demo 採用兩組對照案例，分別呈現「正常」與「異常」判定，已透過 `demo_predict.py` 實際驗證）：
 
   ```python
-  result = predict_patient(
-      age=45, gender=1, screening_year=2024,
-      smoking=3, betel_nut=4, indigenous=0,
-      oral_discomfort=1, screening_count=2,
-      prev_result=0, years_since_last=2.0,
+  # 案例一：低風險 → 預測「正常」
+  predict_patient(
+      age=55, gender=0, smoking=0, betel_nut=1, indigenous=0,
+      oral_discomfort=0, screening_count=3, prev_result=0, years_since_last=6.0,
+  )
+  # {'prediction': 0, 'result_label': '正常',
+  #  'abnormal_probability': 0.1628, 'threshold': 0.35,
+  #  'model_used': 'Random Forest'}
+
+  # 案例二：高風險 → 預測「異常（建議轉介）」
+  predict_patient(
+      age=45, gender=1, smoking=4, betel_nut=5, indigenous=0,
+      oral_discomfort=1, screening_count=0, prev_result=1, years_since_last=0.0,
   )
   # {'prediction': 1, 'result_label': '異常（建議轉介）',
-  #  'abnormal_probability': 0.72, 'threshold': 0.35,
+  #  'abnormal_probability': 0.7222, 'threshold': 0.35,
   #  'model_used': 'Random Forest'}
   ```
 
-- 此 Demo 可在口頭報告中現場執行，展示「輸入病患特徵 → 輸出風險判定與機率」的完整應用情境，滿足課程要求的「Final Result / Demo：需展示預測結果，文字說明不足以達標」
+- 此 Demo 可在口頭報告中現場執行（或播放預錄畫面），展示「輸入病患特徵 → 輸出風險判定與機率」的完整應用情境，並透過一組「正常」、一組「異常」的對照，呈現模型的判別能力，滿足課程要求的「Final Result / Demo：需展示預測結果，文字說明不足以達標」
 
 ### 9.4 可重現環境
 
@@ -291,6 +299,10 @@
 3. **決策門檻（threshold）調整分析**：`predict.py` 已將門檻由 0.5 調降至 0.35 以提高 Recall，可將這個權衡過程（Precision-Recall trade-off）整理成圖表或說明，作為「模型評估」與「實務應用」之間的橋接素材，凸顯本專題對醫療情境的深入思考
 4. **PPT / 講稿**：可參考既有 `note-20260526.md`（W14 提案簡報講稿）與本文件章節架構延伸撰寫期末報告講稿，並依 8–10 分鐘時限調整詳略
 5. **繳交項目檢查清單**：PowerPoint、簡報錄影、原始與處理後資料集（`oral0507-v1.csv` 不進版控，需另外打包提供）、模型訓練成果（`model_comparison.csv`、四張圖、`model_bundle.pkl`）、程式碼（`main.py`、`src/`、`predict.py`、`config.py`）
+6. **模型機率校準（calibration）問題（Demo 準備過程中的實測發現）**：在系統性測試多組病患特徵組合以挑選 Demo 案例時發現，模型對部分「直覺上應屬低風險」的組合（如中年、無菸檳習慣、過去篩檢皆正常者）仍可能輸出偏高的異常機率。經查證 `classes_`、`feature_cols` 順序、`feature_importances_` 均正確，排除程式錯誤的可能，這其實反映的是模型「機率校準」層面的限制：
+   - **原因一**：類別不平衡資料以 SMOTE 過採樣後，在少數類別樣本稀疏的特徵空間區域（例如「無菸檳習慣」族群——因為篩檢資格本身已對母體篩選過一輪，這類族群在資料中本就稀少），合成樣本可能扭曲該區域的決策邊界
+   - **原因二**：訓練資料對這類族群的覆蓋率偏低，是資料分布上的根本限制，非單靠演算法調整能完全解決
+   - **可能的改進方向**（若要將模型真正落地使用）：① 導入機率校準層（如 `sklearn.calibration.CalibratedClassifierCV`，採 Platt Scaling 或 Isotonic Regression）讓輸出機率更貼近真實發生比例；② 以 `precision_recall_curve()` 系統化選擇判定門檻，取代目前依經驗設定的 0.35；③ 對訓練資料中少見的特徵組合標示「低信心 / 建議人工複核」而非直接給出單一機率數字；④ 上線後持續追蹤真實結果並定期重新校準（model drift 管理）。這些方向也再次印證了本專題「模型應作為輔助分診工具、而非自動判定工具」的核心立場（見 §1、§7.5）
 
 ---
 
