@@ -56,7 +56,7 @@
 
 ## 第 9 頁｜模型比較與分析（建議 30 秒）
 
-「最佳模型」其實取決於採用的指標：Random Forest 的 F1 與 AUC 最佳，但屬於黑箱模型；SVM 的 Recall 最高，最符合「不能漏掉異常」的醫療優先序；Logistic Regression 最具可解釋性、適合作臨床基準；Decision Tree 結構最直觀，但漏報最多。整體來說，Random Forest 與 SVM 互為候選最佳模型，實際選擇應對齊應用場景的代價結構。
+「最佳模型」取決於最在意的指標：以 F1 與 AUC 來看，Random Forest 綜合最佳，但它是黑箱模型、部署成本也較高；若醫療情境最在乎「不漏掉異常」，SVM 的 Recall 最高，更符合需求；Logistic Regression 可解釋性最強，適合作臨床基準；Decision Tree 最直觀，但漏報最多。因此 Random Forest 與 SVM 互為候選，實際應視應用場景的優先考量來選擇。
 
 ---
 
